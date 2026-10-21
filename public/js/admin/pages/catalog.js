@@ -113,6 +113,7 @@ export const products = resourcePage({
     { name: 'mrp', label: 'MRP (₹)', type: 'money', half: true },
     { name: 'inStock', label: 'In stock', type: 'switch', half: true, default: true },
     { name: 'prescriptionRequired', label: 'Prescription required (Rx)', type: 'switch', half: true },
+    { name: 'featured', label: 'Show in shop Bestsellers', type: 'switch', half: true },
     { type: 'section', label: 'More details (optional)' },
     { name: 'manufacturer', label: 'Company', half: true },
     { name: 'composition', label: 'Salt / composition', half: true },

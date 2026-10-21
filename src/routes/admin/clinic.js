@@ -3,13 +3,7 @@ const Doctor = require('../../models/Doctor');
 const Appointment = require('../../models/Appointment');
 const { nextSeq } = require('../../models/Counter');
 const httpError = require('../../utils/httpError');
-
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const toMin = (t) => {
-  const [h, m] = String(t || '').split(':').map(Number);
-  return h * 60 + m;
-};
-const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const { slotsFor, isSlotTaken } = require('../../services/slots');
 
 const doctors = crudRouter(Doctor, {
   search: ['name', 'specialization', 'phone'],
@@ -21,14 +15,7 @@ const doctors = crudRouter(Doctor, {
 
 async function assertSlotFree(data, excludeId) {
   if (!data.doctor || !data.date || !data.time) return;
-  const clash = await Appointment.exists({
-    ...(excludeId ? { _id: { $ne: excludeId } } : {}),
-    doctor: data.doctor,
-    date: data.date,
-    time: data.time,
-    status: { $nin: ['cancelled', 'no-show'] },
-  });
-  if (clash) throw httpError(409, `This doctor already has an appointment at ${data.time} on ${data.date}`);
+  if (await isSlotTaken(data, excludeId)) throw httpError(409, `This doctor already has an appointment at ${data.time} on ${data.date}`);
 }
 
 const appointments = crudRouter(Appointment, {
@@ -53,30 +40,18 @@ const appointments = crudRouter(Appointment, {
       const current = await Appointment.findById(id).lean();
       if (current) data = { ...current, ...data };
     }
-    if (!['cancelled', 'no-show'].includes(data.status)) await assertSlotFree(data, id);
+    if (!['cancelled', 'no-show', 'awaiting-payment'].includes(data.status)) await assertSlotFree(data, id);
   },
 });
 
 // GET ?doctor=&date=YYYY-MM-DD → all slots for that day with availability
 async function slots(req, res, next) {
   try {
-    const { doctor: doctorId, date } = req.query;
-    if (!isId(doctorId) || !/^\d{4}-\d{2}-\d{2}$/.test(date || '')) throw httpError(400, 'doctor and date are required');
-    const doctor = await Doctor.findById(doctorId).lean();
-    if (!doctor) throw httpError(404, 'Doctor not found');
-
-    const day = DAY_NAMES[new Date(`${date}T00:00:00Z`).getUTCDay()];
-    const worksToday = !doctor.days?.length || doctor.days.includes(day);
-    const booked = new Set(
-      (await Appointment.find({ doctor: doctorId, date, status: { $nin: ['cancelled', 'no-show'] } }).select('time').lean()).map((a) => a.time)
-    );
-    const list = [];
-    if (worksToday) {
-      for (let m = toMin(doctor.startTime); m + doctor.slotMinutes <= toMin(doctor.endTime); m += doctor.slotMinutes) {
-        list.push({ time: toTime(m), booked: booked.has(toTime(m)) });
-      }
-    }
-    res.json({ day, worksToday, slots: list });
+    const { doctor, date } = req.query;
+    if (!isId(doctor) || !/^\d{4}-\d{2}-\d{2}$/.test(date || '')) throw httpError(400, 'doctor and date are required');
+    const r = await slotsFor(doctor, date);
+    if (!r) throw httpError(404, 'Doctor not found');
+    res.json({ day: r.day, worksToday: r.worksToday, slots: r.slots });
   } catch (err) {
     next(err);
   }

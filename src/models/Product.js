@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema(
     rackLocation: { type: String, trim: true, maxlength: 40 },
     supplier: { type: String, trim: true, maxlength: 120 },
     prescriptionRequired: { type: Boolean, default: false },
+    featured: { type: Boolean, default: false, index: true }, // shown in the shop's Bestsellers carousel
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

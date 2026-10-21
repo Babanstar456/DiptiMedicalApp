@@ -17,6 +17,7 @@ r.use('/orders', shop, require('./orders'));
 r.use('/doctors', shop, doctors);
 r.get('/appointment-slots', shop, slots);
 r.use('/appointments', shop, appointments);
+r.use('/prescriptions', shop, require('./prescriptions'));
 
 r.use('/staff', adminOnly, staff);
 r.use('/attendance', adminOnly, attendance);

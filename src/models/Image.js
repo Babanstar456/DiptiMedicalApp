@@ -7,6 +7,8 @@ const imageSchema = new mongoose.Schema(
     contentType: { type: String, required: true },
     size: Number,
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // Prescriptions are private: only the uploader and pharmacy staff can open them, never via the public URL.
+    private: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

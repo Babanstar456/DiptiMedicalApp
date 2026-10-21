@@ -3,12 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b9467" />
-  <meta name="description" content="Sign in to Dipti Medical – order medicines, upload prescriptions and track orders." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Sign in · Dipti Medical</title>
+  <meta name="theme-color" content="#0c3b2e" />
+  <meta name="description" content="Dipti Medical – order genuine medicines and health essentials online, book doctor appointments and upload prescriptions. Call 8001506000." />
+  <title>Dipti Medical · Online Pharmacy</title>
   <link rel="icon" type="image/png" href="/img/favicon-64.png" />
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -16,107 +13,102 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
-  <script type="module" src="/js/login.js"></script>
+  <link rel="stylesheet" href="/css/shop.css" />
+  <script type="module" src="/js/shop/app.js"></script>
 </head>
-<body>
-  <!-- ========== Splash / boot loader ========== -->
-  <div id="splash" class="splash" role="status" aria-live="polite">
-    <img class="splash__brand" src="/img/logo-full.png" alt="Dipti Medical" width="200" height="182" />
-    <p class="splash__tag">Care you can trust</p>
-    <div class="splash__bar"><span></span></div>
-    <p class="splash__status" id="splashStatus">Loading…</p>
-  </div>
-
-  <main class="auth">
-    <!-- Brand panel: compact header on phones, full side panel on tablets/desktop -->
-    <section class="brand" aria-hidden="true">
-      <div class="brand__inner">
-        <div class="brand__logo">
-          <img src="/img/logo-mark.png" alt="" width="48" height="48" />
-          <span>Dipti Medical</span>
-        </div>
-        <h2 class="brand__headline">Your health,<br />delivered with care.</h2>
-        <ul class="brand__perks">
-          <li><span class="perk-icon">💊</span>Genuine medicines, always</li>
-          <li><span class="perk-icon">📄</span>Upload prescriptions in seconds</li>
-          <li><span class="perk-icon">🚚</span>Fast doorstep delivery</li>
-        </ul>
-        <div class="brand__pills">
-          <span class="pill pill--1"></span>
-          <span class="pill pill--2"></span>
-          <span class="pill pill--3"></span>
-        </div>
+<body class="shop">
+  <div class="topstrip">
+    <div class="wrap">
+      <div class="topstrip__links">
+        <a href="tel:+918001506000" data-phone-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span data-phone>8001506000</span></a>
+        <a class="topstrip__email" href="mailto:digital.diptimedical@gmail.com" data-email-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg><span data-email>digital.diptimedical@gmail.com</span></a>
       </div>
-    </section>
-
-    <!-- Auth card -->
-    <section class="card" aria-labelledby="cardTitle">
-      <div class="card__handle" aria-hidden="true"></div>
-      <header class="card__header">
-        <h1 id="cardTitle" class="card__title">Welcome to Dipti Medical</h1>
-        <p id="cardSubtitle" class="card__subtitle">Continue with Google or your email. New here? Your account is created automatically.</p>
-      </header>
-
-      <div class="social">
-        <button id="googleBtn" class="btn btn--social" type="button">
-          <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-          <span>Continue with Google</span>
-        </button>
-      </div>
-
-      <div class="divider"><span>or continue with email</span></div>
-
-      <form id="authForm" class="form" novalidate>
-        <div class="field">
-          <label for="email">Email address</label>
-          <div class="field__control">
-            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5Z"/></svg>
-            <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
-          </div>
-        </div>
-
-        <div class="field">
-          <div class="field__row">
-            <label for="password">Password</label>
-            <button id="forgotBtn" class="link" type="button">Forgot password?</button>
-          </div>
-          <div class="field__control">
-            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2ZM9 6a3 3 0 0 1 6 0v2H9Z"/></svg>
-            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" minlength="6" required />
-            <button id="togglePw" class="field__toggle" type="button" aria-label="Show password" aria-pressed="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5Zm0 11a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-            </button>
-          </div>
-          <p class="field__hint">At least 6 characters. Forgot it? We’ll email you a reset link.</p>
-        </div>
-
-        <p id="formError" class="form__error" role="alert" hidden></p>
-
-        <button id="submitBtn" class="btn btn--primary" type="submit">
-          <span class="btn__label">Continue</span>
-          <span class="btn__spinner" aria-hidden="true"></span>
-        </button>
-      </form>
-
-      <p class="card__legal">
-        By continuing you agree to Dipti Medical's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
-      </p>
-    </section>
-  </main>
-
-  <!-- ========== Auth-in-progress overlay ========== -->
-  <div id="authLoader" class="loader" hidden role="alertdialog" aria-modal="true" aria-labelledby="loaderText">
-    <div class="loader__box">
-      <div class="capsule" aria-hidden="true">
-        <span class="capsule__half capsule__half--a"></span>
-        <span class="capsule__half capsule__half--b"></span>
-      </div>
-      <p id="loaderText" class="loader__text">Signing you in…</p>
-      <div class="loader__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <span class="topstrip__note">Genuine medicines · Minimum order <span data-min-order>₹200</span></span>
     </div>
   </div>
 
-  <!-- Toast -->
+  <header class="header">
+    <div class="wrap header__row">
+      <button class="hbtn hamburger" type="button" aria-label="Open menu" aria-controls="drawer" aria-expanded="false" data-menu-open>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+      <a class="logo" href="#/" aria-label="Dipti Medical home">
+        <img src="/img/logo-mark.png" alt="" width="38" height="38" />
+        <span><strong>DIPTI</strong><small>MEDICAL</small></span>
+      </a>
+      <div class="header__search" data-search-slot="desktop"></div>
+      <nav class="header__actions" aria-label="Account and cart">
+        <a class="hbtn" href="#/doctors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg><span class="hbtn__label">Doctors</span></a>
+        <a class="hbtn" href="#/account" data-account-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/></svg><span class="hbtn__label" data-account-label>Login</span></a>
+        <a class="hbtn" href="#/cart" aria-label="Cart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.7-1l3.6-6.5A1 1 0 0 0 20.4 4H5.2l-.9-2H1zm16 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg><span class="hbtn__label">Cart</span><span class="count" data-cart-count hidden>0</span></a>
+      </nav>
+    </div>
+    <div class="wrap header__mobile-search" data-search-slot="mobile"></div>
+    <nav class="catnav" aria-label="Shop by category"><div class="wrap" data-catnav></div></nav>
+  </header>
+
+  <aside id="drawer" class="drawer" aria-label="Menu" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__user" data-drawer-user></div>
+      <button class="hbtn" type="button" aria-label="Close menu" data-menu-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button>
+    </div>
+    <nav class="drawer__body" data-drawer-links></nav>
+  </aside>
+  <div class="drawer-scrim" data-menu-close hidden></div>
+
+  <main id="view" class="main" tabindex="-1"></main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand"><img src="/img/logo-mark.png" alt="" width="44" height="44" /><strong>Dipti Medical</strong></div>
+          <p style="margin:0 0 14px;max-width:360px">Your neighbourhood pharmacy, online. Genuine medicines, health essentials and doctor consultations, with care you can trust.</p>
+          <div class="footer__contact" style="display:grid;gap:10px">
+            <a href="tel:+918001506000" data-phone-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span data-phone>8001506000</span></a>
+            <a href="mailto:digital.diptimedical@gmail.com" data-email-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg><span data-email>digital.diptimedical@gmail.com</span></a>
+          </div>
+        </div>
+        <div>
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="#/categories">All categories</a></li>
+            <li><a href="#/search?featured=1">Bestsellers</a></li>
+            <li><a href="#/upload">Upload prescription</a></li>
+            <li><a href="#/doctors">Book a doctor</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Help</h4>
+          <ul>
+            <li><a href="#/account">My account</a></li>
+            <li><a href="#/account/orders">Track my order</a></li>
+            <li><a href="#/cart">My cart</a></li>
+            <li><a href="tel:+918001506000" data-phone-link>Call to order</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span data-year></span> Dipti Medical. All rights reserved.</span>
+        <span>Minimum order <span data-min-order>₹200</span> · Secure payments by Razorpay</span>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="bottomnav" aria-label="Main">
+    <a href="#/" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</a>
+    <a href="#/categories" data-tab="categories"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>Categories</a>
+    <a href="#/doctors" data-tab="doctors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Doctors</a>
+    <a href="#/cart" data-tab="cart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.7-1l3.6-6.5A1 1 0 0 0 20.4 4H5.2l-.9-2H1zm16 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>Cart<span class="count" data-cart-count hidden>0</span></a>
+    <a href="#/account" data-tab="account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/></svg>Account</a>
+  </nav>
+
+  <div class="fab">
+    <a class="fab__wa" href="https://wa.me/918001506000" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" data-wa-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1a17 17 0 0 1-1.7-.6 13.6 13.6 0 0 1-5.2-4.6 6 6 0 0 1-1.2-3.1 3.4 3.4 0 0 1 1-2.5 1.1 1.1 0 0 1 .8-.4h.6c.2 0 .4 0 .7.5l1 2.4a.6.6 0 0 1 0 .6 2.4 2.4 0 0 1-.4.6l-.5.6c-.2.2-.3.4-.1.7a10 10 0 0 0 1.8 2.3 9 9 0 0 0 2.6 1.6c.3.2.5.1.7-.1l1-1.2c.2-.3.4-.3.7-.2l2.2 1c.3.2.6.3.6.4a2.7 2.7 0 0 1-.2 1.5z"/></svg></a>
+    <a class="fab__call" href="tel:+918001506000" aria-label="Call Dipti Medical" data-phone-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+  </div>
+
+  <div id="modalRoot"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

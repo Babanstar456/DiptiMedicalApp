@@ -38,12 +38,12 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", 'https://www.gstatic.com', 'https://apis.google.com'],
+        scriptSrc: ["'self'", 'https://www.gstatic.com', 'https://apis.google.com', 'https://checkout.razorpay.com'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-        connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com'],
-        frameSrc: ["'self'", 'https://*.firebaseapp.com', 'https://*.web.app', 'https://accounts.google.com'],
+        connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://*.razorpay.com'],
+        frameSrc: ["'self'", 'https://*.firebaseapp.com', 'https://*.web.app', 'https://accounts.google.com', 'https://*.razorpay.com'],
         upgradeInsecureRequests: isProd ? [] : null,
       },
     },
@@ -52,8 +52,9 @@ app.use(
   })
 );
 app.use(compression());
-app.use('/api/admin/uploads', express.json({ limit: '3mb' })); // base64 images
-app.use(express.json({ limit: '200kb' }));
+app.use(['/api/admin/uploads', '/api/shop/my/uploads'], express.json({ limit: '3mb' })); // base64 images
+// Keep the raw body for the Razorpay webhook signature check
+app.use(express.json({ limit: '200kb', verify: (req, res, buf) => req.originalUrl.startsWith('/api/shop/payments/webhook') && (req.rawBody = buf) }));
 app.use(morgan(isProd ? 'combined' : 'dev'));
 
 app.get('/api/health', (req, res) =>
@@ -77,6 +78,12 @@ app.use(
 );
 app.use('/api/admin', withDB, require('./src/routes/admin'));
 app.use('/api/images', withDB, require('./src/routes/images'));
+app.use(
+  '/api/shop',
+  withDB,
+  rateLimit({ windowMs: 5 * 60 * 1000, limit: 600, standardHeaders: 'draft-7', legacyHeaders: false }),
+  require('./src/routes/shop')
+);
 
 // Locally Express serves public/; on Vercel the same folder is served by its CDN.
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: isProd ? '1h' : 0 }));

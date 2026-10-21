@@ -13,7 +13,7 @@ r.get('/', async (req, res, next) => {
     const today = todayIST();
     const monthStart = startOfDayIST(`${today.slice(0, 7)}-01`);
     const weekStart = startOfDayIST(addDays(today, -6));
-    const notCancelled = { status: { $ne: 'cancelled' } };
+    const notCancelled = { status: { $nin: ['cancelled', 'awaiting-payment'] } };
     const sum = (match) => Order.aggregate([{ $match: match }, { $group: { _id: null, amount: { $sum: '$total' }, count: { $sum: 1 } } }]);
 
     const [todaySales, monthSales, openOrders, outOfStock, noPrice, products, appointmentsToday, upcoming, staffCount, presentToday, recentOrders, last7] =

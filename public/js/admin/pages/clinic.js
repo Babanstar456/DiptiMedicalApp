@@ -36,7 +36,7 @@ export const doctors = resourcePage({
 });
 
 const doctorOptions = () => loadOptions('/doctors?limit=200&isActive=true&sort=name', (d) => `${d.name}${d.specialization ? ` · ${d.specialization}` : ''}`);
-const STATUSES = ['pending', 'confirmed', 'completed', 'cancelled', 'no-show'];
+const STATUSES = ['awaiting-payment', 'pending', 'confirmed', 'completed', 'cancelled', 'no-show'];
 
 // Shows the doctor's free slots for the chosen date; clicking one fills the time field.
 function wireSlots(form, item) {
@@ -96,7 +96,7 @@ export const appointments = resourcePage({
     { label: 'When', main: true, render: (a) => html`<strong>${fmtTime(a.time)}</strong> <small class="muted">${fmtDate(a.date)} · ${a.appointmentNo}</small>` },
     { label: 'Patient', render: (a) => html`${a.patientName}<br /><small class="muted"><a href="tel:${a.patientPhone}">${a.patientPhone}</a>${a.patientAge ? ` · ${a.patientAge}y` : ''}</small>` },
     { label: 'Doctor', render: (a) => a.doctor?.name || '—' },
-    { label: 'Fee', num: true, render: (a) => html`${money(a.fee)}<br />${badge(a.paymentStatus)}` },
+    { label: 'Fee', num: true, render: (a) => html`${money(a.fee)}<br />${badge(a.paymentStatus)}${a.channel === 'online' ? html` <span class="badge badge--info">Online</span>` : ''}` },
     { label: 'Status', render: (a) => badge(a.status) },
   ],
   fields: [
@@ -111,7 +111,7 @@ export const appointments = resourcePage({
     { name: 'reason', label: 'Reason for visit', type: 'textarea' },
     { type: 'section', label: 'Status & payment' },
     { name: 'status', label: 'Status', type: 'select', options: STATUSES, required: true, half: true, default: 'confirmed' },
-    { name: 'paymentStatus', label: 'Payment', type: 'select', options: ['unpaid', 'paid', 'refunded'], required: true, half: true, default: 'unpaid' },
+    { name: 'paymentStatus', label: 'Payment', type: 'select', options: [{ value: 'unpaid', label: 'Unpaid' }, { value: 'token-paid', label: 'Token paid online' }, { value: 'paid', label: 'Fully paid' }, { value: 'refunded', label: 'Refunded' }], required: true, half: true, default: 'unpaid' },
     { name: 'fee', label: 'Fee (₹)', type: 'money', half: true, hint: 'Leave empty to use the doctor’s fee' },
     { name: 'notes', label: 'Doctor / desk notes', type: 'textarea' },
   ],

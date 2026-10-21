@@ -42,8 +42,8 @@ export const label = (s) => String(s || '').replace(/-/g, ' ');
 const sentence = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 const BADGES = {
-  ok: ['delivered', 'completed', 'paid', 'present', 'active', 'confirmed', 'admin'],
-  warn: ['pending', 'packed', 'unpaid', 'half-day', 'draft', 'unpaid-leave', 'low', 'pharmacist'],
+  ok: ['delivered', 'completed', 'paid', 'token-paid', 'present', 'active', 'confirmed', 'admin', 'called', 'ordered'],
+  warn: ['pending', 'packed', 'unpaid', 'half-day', 'draft', 'unpaid-leave', 'low', 'pharmacist', 'awaiting-payment', 'new'],
   bad: ['cancelled', 'absent', 'no-show', 'refunded', 'inactive', 'expired', 'out'],
   info: ['out-for-delivery', 'paid-leave', 'holiday'],
 };
@@ -90,6 +90,22 @@ export async function api(path, { method = 'GET', body } = {}) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(data.error || `Request failed (${res.status})`), { status: res.status });
   return data;
+}
+
+// Opens a private image (e.g. a customer's prescription) in a new tab using the signed-in staff token.
+export async function openPrivateImage(id) {
+  const win = window.open('', '_blank');
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(`/api/admin/uploads/private/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error('Could not open the image');
+    const url = URL.createObjectURL(await res.blob());
+    if (win) win.location = url;
+    else window.location.assign(url);
+  } catch (err) {
+    win?.close();
+    toastError(err);
+  }
 }
 
 /* ---------------- Page chrome ---------------- */

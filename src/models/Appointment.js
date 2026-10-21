@@ -15,11 +15,19 @@ const appointmentSchema = new mongoose.Schema(
     reason: { type: String, trim: true, maxlength: 500 },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'completed', 'cancelled', 'no-show'],
+      enum: ['awaiting-payment', 'pending', 'confirmed', 'completed', 'cancelled', 'no-show'],
       default: 'confirmed',
     },
     fee: { type: Number, min: 0, default: 0 },
-    paymentStatus: { type: String, enum: ['unpaid', 'paid', 'refunded'], default: 'unpaid' },
+    // token-paid = online booking token received; the rest is collected at the clinic
+    paymentStatus: { type: String, enum: ['unpaid', 'token-paid', 'paid', 'refunded'], default: 'unpaid' },
+    tokenAmount: { type: Number, min: 0, default: 0 },
+    channel: { type: String, enum: ['desk', 'online'], default: 'desk' },
+    payment: {
+      razorpayOrderId: { type: String, index: true, sparse: true },
+      razorpayPaymentId: String,
+      paidAt: Date,
+    },
     notes: { type: String, trim: true, maxlength: 1000 },
   },
   { timestamps: true }

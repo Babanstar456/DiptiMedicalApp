@@ -113,6 +113,7 @@ for (const r of rows) {
     composition: JUNK_SALT.test(salt) ? '' : salt,
     supplier: r.supplier,
     inStock: r.closingStock > 0,
+    featured: r.section === 'FAST MOVING', // shop Bestsellers
     category: categoryOf(key, salt),
     type: typeOf(key, categoryOf(key, salt)),
   };
@@ -120,6 +121,7 @@ for (const r of rows) {
   // Same item listed twice: in stock if either line has stock; keep the first non-empty details.
   if (prev) {
     prev.inStock = prev.inStock || item.inStock;
+    prev.featured = prev.featured || item.featured;
     for (const k of ['manufacturer', 'rackLocation', 'composition', 'supplier']) prev[k] = prev[k] || item[k];
   } else byName.set(key, item);
 }
@@ -159,7 +161,7 @@ console.log('Types:', Object.fromEntries(count('type')));
       update: {
         $set: { inStock: i.inStock, manufacturer: i.manufacturer, rackLocation: i.rackLocation, composition: i.composition, supplier: i.supplier },
         // Only for new products: never overwrite what was edited in the app
-        $setOnInsert: { name: i.name, category: idFor[`Category:${i.category}`], type: idFor[`ProductType:${i.type}`], isActive: true },
+        $setOnInsert: { name: i.name, category: idFor[`Category:${i.category}`], type: idFor[`ProductType:${i.type}`], isActive: true, featured: i.featured },
       },
       upsert: true,
     },

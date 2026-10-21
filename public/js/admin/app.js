@@ -9,6 +9,7 @@ const NAV = [
   { id: 'products', title: 'Products & stock', icon: 'M4.2 13.8a5 5 0 0 1 0-7.1l2.5-2.5a5 5 0 0 1 7.1 7.1l-2.5 2.5-.1.1 6.3 6.3a5 5 0 0 1-7.1 0l-6.2-6.4zM8.1 5.6 5.6 8.1a3 3 0 0 0 0 4.2l1.1 1.1 5.6-5.6-1.1-1.1a3 3 0 0 0-3.1-1.1z', load: () => import('./pages/catalog.js').then((m) => ({ default: m.products })) },
   { group: 'Clinic' },
   { id: 'appointments', title: 'Appointments', icon: 'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11zM7 11h5v5H7z', load: () => import('./pages/clinic.js').then((m) => ({ default: m.appointments })) },
+  { id: 'prescriptions', title: 'Prescription requests', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM8 14h8v2H8zm0 3h5v2H8z', load: () => import('./pages/prescriptions.js') },
   { id: 'doctors', title: 'Doctors', icon: 'M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z', load: () => import('./pages/clinic.js').then((m) => ({ default: m.doctors })) },
   { group: 'People', admin: true },
   { id: 'staff', title: 'Staff', admin: true, icon: 'M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z', load: () => import('./pages/hr.js').then((m) => ({ default: m.staff })) },
@@ -95,19 +96,19 @@ const [{ onAuthStateChanged, signOut }, { auth }] = await Promise.all([
 
 $('#signOut').addEventListener('click', async () => {
   await signOut(auth);
-  location.replace('/');
+  location.replace('/login/');
 });
 
 let booted = false;
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.replace('/');
+  if (!user) return location.replace('/login/?next=/admin/');
   if (booted) return;
   try {
     ({ user: me } = await api('/api/auth/me'));
   } catch (err) {
     return hideSplash(`Could not load your account: ${err.message}`);
   }
-  if (!['admin', 'pharmacist'].includes(me.role)) return location.replace('/home/');
+  if (!['admin', 'pharmacist'].includes(me.role)) return location.replace('/');
   booted = true;
 
   const name = me.displayName || me.email;

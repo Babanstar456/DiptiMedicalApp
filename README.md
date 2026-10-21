@@ -12,10 +12,12 @@ src/middleware/verifyFirebaseToken.js
 src/models/User.js             User collection
 src/routes/auth.js             POST /api/auth/session, GET /api/auth/me
 src/routes/config.js           GET /api/config/firebase (public web config)
-public/index.html              Login page (one "Continue" flow) + loading UI
-public/home/index.html         Customer home (placeholder)
+public/index.html              Online shop (search, categories, carousels, product pages, cart, checkout,
+                               doctor booking, upload prescription, my account) – mobile-first with bottom tabs
+public/login/index.html        Login page (one "Continue" flow) + loading UI
 public/admin/index.html        Admin panel (dashboard, products & stock, orders, clinic, HR, payroll)
 src/routes/admin/              Admin API (role-protected)
+src/routes/shop.js             Shop API (public catalogue + signed-in customer endpoints)
 public/css, public/js, public/img
 ```
 
@@ -67,6 +69,31 @@ npm start
 ```
 Open http://localhost:3000 — to test on your phone, open `http://<your-PC-LAN-IP>:3000`
 (and add that IP to Firebase *Authorized domains*).
+
+## Online shop (`/`)
+- Browse without signing in; sign-in is needed for checkout, bookings and prescriptions (`/login/?next=…`).
+- **Minimum order ₹200** (checked on the server), free delivery, payment by **Razorpay** (UPI, cards, netbanking).
+- Products without a price show **Call to order** (8001506000); out-of-stock products can't be added.
+- Prescription (Rx) products need a prescription photo at checkout. Prescription photos are private:
+  only the customer and pharmacy staff can open them.
+- **Doctor booking**: pick a date and free slot, pay a **₹100 token** online; the rest is paid at the clinic.
+  An unpaid booking holds its slot for 15 minutes.
+- **Upload prescription**: the customer sends a photo + phone; staff see it under *Prescription requests* and call back.
+- **My account**: current orders with live status, **Order again**, appointments, prescriptions, profile
+  (name, phone, date of birth → age, gender, health conditions) and saved addresses. Delivery name, phone and
+  address are required and saved automatically when ordering.
+- Bestsellers carousel = products marked *Show in shop Bestsellers* (the report import marks fast-moving items).
+- Shop phone, email, minimum order and token amount can be changed with `SHOP_PHONE`, `SHOP_EMAIL`,
+  `MIN_ORDER_VALUE`, `CONSULT_TOKEN_AMOUNT`.
+
+### Razorpay setup
+1. https://dashboard.razorpay.com → *Account & Settings → API Keys* → generate keys (start with **Test mode**).
+2. Add `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` to `.env` and to Vercel.
+3. Recommended: *Webhooks* → add `https://<your-site>/api/shop/payments/webhook` with events `payment.captured`
+   and `order.paid`; put its secret in `RAZORPAY_WEBHOOK_SECRET`. This confirms payments even if the customer
+   closes the app right after paying.
+4. When everything works in test mode, switch to **Live** keys.
+Until the keys are set, checkout and booking show "Online payment is not set up yet. Please call 8001506000".
 
 ## Admin panel (`/admin/`)
 - **Who gets in:** emails in `ADMIN_EMAILS` (default `digital.diptimedical@gmail.com`) become **admin** on login, but only once

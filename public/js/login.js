@@ -113,7 +113,10 @@ async function completeLogin(user) {
     });
     loaderText.textContent = isNewUser ? 'Welcome to Dipti Medical!' : 'Welcome back!';
     sessionStorage.setItem('dm_welcome', isNewUser ? 'new' : 'back');
-    const dest = ['admin', 'pharmacist'].includes(profile.role) ? '/admin/' : '/home/';
+    // Back to where the customer came from (e.g. checkout); staff go to the admin panel
+    const next = new URLSearchParams(location.search).get('next');
+    const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+    const dest = safeNext || (['admin', 'pharmacist'].includes(profile.role) ? '/admin/' : '/');
     setTimeout(() => location.replace(dest), 500);
   } catch (err) {
     console.error(err);

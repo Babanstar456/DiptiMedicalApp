@@ -1,6 +1,6 @@
 import {
   $, $$, html, el, raw, api, money, num, fmtDate, fmtDateTime, badge, setPage, button, modal, withLoading, toast, toastError,
-  skeleton, emptyState, icon, debounce, qs, label, confirmDialog, printHTML, SHOP, renderFields, readFields, validateFields,
+  skeleton, emptyState, icon, debounce, qs, label, confirmDialog, printHTML, SHOP, renderFields, readFields, validateFields, openPrivateImage,
 } from '../core.js';
 
 /* ---------------- Product search picker ---------------- */
@@ -41,7 +41,13 @@ function productPicker(onPick) {
 }
 
 const MAX_QTY = 999;
-const STATUSES = ['pending', 'confirmed', 'packed', 'out-for-delivery', 'delivered', 'cancelled'];
+const age = (dob) => {
+  const [y, m, d] = dob.split('-').map(Number);
+  const now = new Date();
+  return now.getFullYear() - y - (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d) ? 1 : 0);
+};
+
+const STATUSES = ['awaiting-payment', 'pending', 'confirmed', 'packed', 'out-for-delivery', 'delivered', 'cancelled'];
 const CHIPS = [['', 'All'], ['open', 'Open'], ...STATUSES.map((s) => [s, label(s)])];
 const PAYMENT_METHODS = ['cash', 'upi', 'card', 'cod', 'online'];
 
@@ -58,7 +64,7 @@ function newOrderDialog(onDone) {
   const payFields = [
     { type: 'section', label: 'Payment' },
     { name: 'channel', label: 'Order type', type: 'select', required: true, half: true, default: 'counter', options: [{ value: 'counter', label: 'Counter sale' }, { value: 'phone', label: 'Phone order' }, { value: 'online', label: 'Online' }] },
-    { name: 'status', label: 'Status', type: 'select', required: true, half: true, default: 'delivered', options: STATUSES.filter((s) => s !== 'cancelled').map((s) => ({ value: s, label: label(s) })) },
+    { name: 'status', label: 'Status', type: 'select', required: true, half: true, default: 'delivered', options: STATUSES.filter((s) => !['cancelled', 'awaiting-payment'].includes(s)).map((s) => ({ value: s, label: label(s) })) },
     { name: 'paymentMethod', label: 'Payment method', type: 'select', required: true, half: true, default: 'cash', options: PAYMENT_METHODS.map((v) => ({ value: v, label: v.toUpperCase() })) },
     { name: 'paymentStatus', label: 'Payment status', type: 'select', required: true, half: true, default: 'paid', options: ['paid', 'unpaid'] },
     { name: 'discount', label: 'Discount (₹)', type: 'money', half: true, default: 0 },
@@ -183,11 +189,15 @@ async function orderDetail(id, onChange) {
           <div><dt>Customer</dt><dd>${o.customer?.name || 'Walk-in'}</dd></div>
           ${o.customer?.phone ? html`<div><dt>Phone</dt><dd><a href="tel:${o.customer.phone}">${o.customer.phone}</a></dd></div>` : ''}
           ${o.customer?.address ? html`<div><dt>Address</dt><dd>${o.customer.address}</dd></div>` : ''}
-          <div><dt>Payment</dt><dd>${o.paymentMethod.toUpperCase()}</dd></div>
+          <div><dt>Payment</dt><dd>${o.paymentMethod.toUpperCase()}${o.payment?.razorpayPaymentId ? html`<br /><small class="muted">${o.payment.razorpayPaymentId}</small>` : ''}</dd></div>
           <div><dt>Created</dt><dd>${fmtDateTime(o.createdAt)}</dd></div>
           ${o.createdBy ? html`<div><dt>By</dt><dd>${o.createdBy.displayName || o.createdBy.email}</dd></div>` : ''}
           ${o.notes ? html`<div><dt>Notes</dt><dd>${o.notes}</dd></div>` : ''}
-          ${o.prescriptionImage ? html`<div><dt>Prescription</dt><dd><a href="${o.prescriptionImage}" target="_blank" rel="noopener">View photo</a></dd></div>` : ''}
+          ${o.user ? html`<div><dt>Customer account</dt><dd>${o.user.email || ''}${o.user.dob ? html`<br /><small class="muted">Age ${age(o.user.dob)}${o.user.gender ? ` · ${o.user.gender}` : ''}</small>` : ''}</dd></div>` : ''}
+          ${o.user?.healthConditions?.length || o.user?.healthNotes ? html`<div><dt>Health</dt><dd>${[...(o.user.healthConditions || []), o.user.healthNotes].filter(Boolean).join(', ')}</dd></div>` : ''}
+          ${o.prescriptionImage
+            ? html`<div><dt>Prescription</dt><dd>${o.prescriptionImage.startsWith('/api/images/') ? html`<a href="${o.prescriptionImage}" target="_blank" rel="noopener">View photo</a>` : html`<button type="button" class="b b--sm" data-rx="${o.prescriptionImage}">View photo</button>`}</dd></div>`
+            : ''}
         </dl>
         <div><strong style="font-size:.85rem">History</strong><ul class="timeline" style="margin-top:8px">${o.history.map(
           (h) => html`<li>${label(h.status)}<small>${fmtDateTime(h.at)}${h.by ? ` · ${h.by.displayName || h.by.email}` : ''}</small></li>`
@@ -196,7 +206,7 @@ async function orderDetail(id, onChange) {
       ${final
         ? ''
         : html`<div class="panel" style="margin-top:16px"><div class="panel__head"><h3 class="panel__title">Update status</h3></div>
-          <div class="chips" style="flex-wrap:wrap;margin:0">${STATUSES.filter((s) => s !== o.status).map(
+          <div class="chips" style="flex-wrap:wrap;margin:0">${STATUSES.filter((s) => s !== o.status && s !== 'awaiting-payment' && (o.status !== 'awaiting-payment' || s === 'cancelled')).map(
             (s) => html`<button type="button" class="chip" data-status="${s}" ${raw(s === 'cancelled' ? 'style="color:var(--danger)"' : '')}>${label(s)}</button>`
           )}</div>
           ${o.paymentStatus !== 'paid' ? html`<button type="button" class="b b--sm" data-paid style="margin-top:10px">Mark payment received</button>` : ''}</div>`}`);
@@ -209,6 +219,8 @@ async function orderDetail(id, onChange) {
   m.root.querySelector('.modal__box').append(foot);
 
   m.body.addEventListener('click', async (e) => {
+    const rxBtn = e.target.closest('[data-rx]');
+    if (rxBtn) return openPrivateImage(rxBtn.dataset.rx);
     const st = e.target.closest('[data-status]');
     if (st) {
       const s = st.dataset.status;
