@@ -1,0 +1,59 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:        # run manually from the Actions tab
+  push:
+    branches: [main]
+
+env:
+  APP_URL: https://dipti-medical-app.vercel.app
+  APP_NAME: Dipti Medical
+  APP_ID: com.dipti.medical
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create Android wrapper app
+        run: |
+          mkdir apk-app && cd apk-app
+          npm init -y
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          mkdir www
+          echo '<!doctype html><html><body>Loading...</body></html>' > www/index.html
+          cat > capacitor.config.json << CONFIG
+          {
+            "appId": "$APP_ID",
+            "appName": "$APP_NAME",
+            "webDir": "www",
+            "server": { "url": "$APP_URL", "cleartext": false }
+          }
+          CONFIG
+          npx cap add android
+          npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd apk-app/android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dipti-medical-apk
+          path: apk-app/android/app/build/outputs/apk/debug/app-debug.apk
