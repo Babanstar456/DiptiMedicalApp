@@ -1,0 +1,13 @@
+{
+  "name": "Dipti Medical",
+  "short_name": "Dipti Medical",
+  "description": "Your trusted neighbourhood pharmacy",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0b9467",
+  "icons": [
+    { "src": "/img/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

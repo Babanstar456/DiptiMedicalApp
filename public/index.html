@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b9467" />
+  <meta name="description" content="Sign in to Dipti Medical – order medicines, upload prescriptions and track orders." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Sign in · Dipti Medical</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/img/logo.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script type="module" src="/js/login.js"></script>
+</head>
+<body>
+  <!-- ========== Splash / boot loader ========== -->
+  <div id="splash" class="splash" role="status" aria-live="polite">
+    <div class="splash__logo">
+      <span class="splash__ring"></span>
+      <span class="splash__ring splash__ring--2"></span>
+      <img src="/img/logo.svg" alt="" width="84" height="84" />
+    </div>
+    <h1 class="splash__title">Dipti Medical</h1>
+    <p class="splash__tag">Care you can trust</p>
+    <div class="splash__bar"><span></span></div>
+    <p class="splash__status" id="splashStatus">Loading…</p>
+  </div>
+
+  <main class="auth">
+    <!-- Brand panel: compact header on phones, full side panel on tablets/desktop -->
+    <section class="brand" aria-hidden="true">
+      <div class="brand__inner">
+        <div class="brand__logo">
+          <img src="/img/logo.svg" alt="" width="48" height="48" />
+          <span>Dipti Medical</span>
+        </div>
+        <h2 class="brand__headline">Your health,<br />delivered with care.</h2>
+        <ul class="brand__perks">
+          <li><span class="perk-icon">💊</span>Genuine medicines, always</li>
+          <li><span class="perk-icon">📄</span>Upload prescriptions in seconds</li>
+          <li><span class="perk-icon">🚚</span>Fast doorstep delivery</li>
+        </ul>
+        <div class="brand__pills">
+          <span class="pill pill--1"></span>
+          <span class="pill pill--2"></span>
+          <span class="pill pill--3"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth card -->
+    <section class="card" aria-labelledby="cardTitle">
+      <div class="card__handle" aria-hidden="true"></div>
+      <header class="card__header">
+        <h1 id="cardTitle" class="card__title">Welcome back</h1>
+        <p id="cardSubtitle" class="card__subtitle">Sign in to continue to Dipti Medical</p>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Authentication mode">
+        <button class="tabs__btn is-active" role="tab" aria-selected="true" data-mode="signin" type="button">Sign in</button>
+        <button class="tabs__btn" role="tab" aria-selected="false" data-mode="signup" type="button">Create account</button>
+        <span class="tabs__indicator" aria-hidden="true"></span>
+      </div>
+
+      <div class="social">
+        <button id="googleBtn" class="btn btn--social" type="button">
+          <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <div class="divider"><span>or continue with email</span></div>
+
+      <form id="authForm" class="form" novalidate>
+        <div class="field field--name" hidden>
+          <label for="name">Full name</label>
+          <div class="field__control">
+            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z"/></svg>
+            <input id="name" name="name" type="text" autocomplete="name" autocapitalize="words" placeholder="e.g. Priya Sharma" maxlength="100" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <div class="field__control">
+            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5Z"/></svg>
+            <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field__row">
+            <label for="password">Password</label>
+            <button id="forgotBtn" class="link" type="button">Forgot password?</button>
+          </div>
+          <div class="field__control">
+            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2ZM9 6a3 3 0 0 1 6 0v2H9Z"/></svg>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required />
+            <button id="togglePw" class="field__toggle" type="button" aria-label="Show password" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5Zm0 11a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
+            </button>
+          </div>
+          <div class="strength" id="strength" hidden><span></span><span></span><span></span><span></span></div>
+        </div>
+
+        <p id="formError" class="form__error" role="alert" hidden></p>
+
+        <button id="submitBtn" class="btn btn--primary" type="submit">
+          <span class="btn__label">Sign in</span>
+          <span class="btn__spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <p class="card__legal">
+        By continuing you agree to Dipti Medical's <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </section>
+  </main>
+
+  <!-- ========== Auth-in-progress overlay ========== -->
+  <div id="authLoader" class="loader" hidden role="alertdialog" aria-modal="true" aria-labelledby="loaderText">
+    <div class="loader__box">
+      <div class="capsule" aria-hidden="true">
+        <span class="capsule__half capsule__half--a"></span>
+        <span class="capsule__half capsule__half--b"></span>
+      </div>
+      <p id="loaderText" class="loader__text">Signing you in…</p>
+      <div class="loader__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b9467" />
+  <title>Home · Dipti Medical</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/home.css" />
+  <script type="module" src="/js/home.js"></script>
+</head>
+<body class="home">
+  <div id="splash" class="splash" role="status" aria-live="polite">
+    <div class="splash__logo">
+      <span class="splash__ring"></span>
+      <span class="splash__ring splash__ring--2"></span>
+      <img src="/img/logo.svg" alt="" width="84" height="84" />
+    </div>
+    <h1 class="splash__title">Dipti Medical</h1>
+    <div class="splash__bar"><span></span></div>
+    <p class="splash__status" id="splashStatus">Loading your account…</p>
+  </div>
+
+  <header class="topbar">
+    <div class="brand__logo"><img src="/img/logo.svg" alt="" width="36" height="36" /><span>Dipti Medical</span></div>
+    <button id="signOutBtn" class="topbar__btn" type="button">Sign out</button>
+  </header>
+
+  <main class="home__main">
+    <section class="profile">
+      <img id="avatar" class="profile__avatar" alt="" width="72" height="72" />
+      <div>
+        <p class="profile__hello">Hello,</p>
+        <h1 id="userName" class="profile__name">—</h1>
+        <p id="userEmail" class="profile__email"></p>
+      </div>
+    </section>
+
+    <p id="verifyNote" class="note" hidden>📧 Please verify your email — we've sent a link to your inbox.</p>
+
+    <dl class="details">
+      <div><dt>Signed in with</dt><dd id="userProvider">—</dd></div>
+      <div><dt>Role</dt><dd id="userRole">—</dd></div>
+      <div><dt>Member since</dt><dd id="userSince">—</dd></div>
+    </dl>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

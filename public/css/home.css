@@ -1,0 +1,33 @@
+body.home { background: var(--surface-2); }
+.topbar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(var(--safe-top) + 12px) calc(var(--gutter) + var(--safe-right)) 12px calc(var(--gutter) + var(--safe-left));
+  color: #fff;
+  background: linear-gradient(135deg, #12b886, var(--brand-700));
+}
+.topbar .brand__logo img { width: 36px; height: 36px; }
+.topbar__btn {
+  min-height: 40px; padding: 0 16px;
+  border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+  background: rgba(255,255,255,.12); color: #fff; font-size: .85rem; font-weight: 500;
+}
+.home__main {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  padding: 24px calc(var(--gutter) + var(--safe-right)) calc(32px + var(--safe-bottom)) calc(var(--gutter) + var(--safe-left));
+}
+.profile {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px; border-radius: 20px; background: #fff;
+  box-shadow: 0 6px 20px rgba(16,35,28,.06);
+}
+.profile__avatar { width: 72px; height: 72px; flex: none; border-radius: 50%; object-fit: cover; background: var(--brand-50); }
+.profile__hello { margin: 0; color: var(--ink-3); font-size: .85rem; }
+.profile__name { margin: 0; font-size: 1.25rem; word-break: break-word; }
+.profile__email { margin: 2px 0 0; color: var(--ink-2); font-size: .85rem; word-break: break-all; }
+.note { margin: 16px 0 0; padding: 12px 16px; border-radius: 14px; background: #fff7e0; color: #7a5b00; font-size: .88rem; }
+.details { display: grid; gap: 1px; margin: 16px 0 0; border-radius: 20px; overflow: hidden; background: var(--line); }
+.details div { display: flex; justify-content: space-between; gap: 12px; padding: 16px 20px; background: #fff; }
+.details dt { color: var(--ink-3); font-size: .85rem; }
+.details dd { margin: 0; font-weight: 500; font-size: .9rem; text-align: right; text-transform: capitalize; }
