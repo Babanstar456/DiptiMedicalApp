@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
 const User = require('../models/User');
+const { isAdminEmail } = require('../utils/admins');
 
 // Called right after any Firebase sign-in (email or Google). Creates or updates the Mongo user.
 router.post('/session', verifyFirebaseToken, async (req, res, next) => {
@@ -30,6 +31,12 @@ router.post('/session', verifyFirebaseToken, async (req, res, next) => {
     });
 
     if (!user.isActive) return res.status(403).json({ error: 'This account has been disabled' });
+
+    // Owner emails are promoted to admin, but only once Firebase has verified the email address.
+    if (fb.email_verified && isAdminEmail(fb.email) && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
+    }
 
     res.json({ user: user.toPublic(), isNewUser: user.loginCount === 1 });
   } catch (err) {

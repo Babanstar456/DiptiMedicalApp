@@ -108,36 +108,6 @@ a { color: var(--brand-600); }
 .card__subtitle { margin: 4px 0 0; color: var(--ink-2); font-size: .92rem; }
 .card__legal { margin: 20px 0 0; text-align: center; font-size: .75rem; color: var(--ink-3); line-height: 1.6; }
 
-/* ---------------- Tabs ---------------- */
-.tabs {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 4px;
-  margin-bottom: 18px;
-  background: var(--surface-2);
-  border-radius: 999px;
-}
-.tabs__btn {
-  position: relative; z-index: 1;
-  min-height: 42px;
-  border: 0; background: none;
-  border-radius: 999px;
-  font-size: .9rem; font-weight: 500;
-  color: var(--ink-2);
-  transition: color .25s;
-}
-.tabs__btn.is-active { color: var(--brand-700); font-weight: 600; }
-.tabs__indicator {
-  position: absolute; top: 4px; bottom: 4px; left: 4px;
-  width: calc(50% - 4px);
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(16,35,28,.1);
-  transition: transform .3s cubic-bezier(.2,.8,.2,1);
-}
-.tabs[data-mode="signup"] .tabs__indicator { transform: translateX(100%); }
-
 /* ---------------- Buttons ---------------- */
 .btn {
   position: relative;
@@ -233,12 +203,7 @@ a { color: var(--brand-600); }
 .field__toggle svg { width: 20px; height: 20px; fill: var(--ink-3); }
 .field__toggle[aria-pressed="true"] svg { fill: var(--brand); }
 
-.strength { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
-.strength span { height: 4px; border-radius: 4px; background: var(--line); transition: background-color .25s; }
-.strength[data-score="1"] span:nth-child(-n+1) { background: var(--danger); }
-.strength[data-score="2"] span:nth-child(-n+2) { background: #f08c00; }
-.strength[data-score="3"] span:nth-child(-n+3) { background: #fab005; }
-.strength[data-score="4"] span:nth-child(-n+4) { background: var(--brand); }
+.field__hint { margin: 6px 0 0; font-size: .75rem; color: var(--ink-3); }
 
 .form__error {
   margin: 0;

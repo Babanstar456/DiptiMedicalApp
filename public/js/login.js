@@ -6,19 +6,13 @@ const loader = $('#authLoader');
 const loaderText = $('#loaderText');
 const toastEl = $('#toast');
 const form = $('#authForm');
-const tabs = document.querySelector('.tabs');
-const nameField = document.querySelector('.field--name');
-const nameInput = $('#name');
 const emailInput = $('#email');
 const pwInput = $('#password');
 const submitBtn = $('#submitBtn');
 const errorEl = $('#formError');
-const strengthEl = $('#strength');
 const forgotBtn = $('#forgotBtn');
 const socialBtns = [$('#googleBtn')];
 
-let mode = 'signin';
-let pendingDisplayName = '';
 let completing = false;
 
 /* ---------------- UI helpers ---------------- */
@@ -47,7 +41,7 @@ function showError(msg) {
 }
 function clearError() {
   errorEl.hidden = true;
-  [nameInput, emailInput, pwInput].forEach((i) => i.classList.remove('is-invalid'));
+  [emailInput, pwInput].forEach((i) => i.classList.remove('is-invalid'));
 }
 
 function setBusy(busy) {
@@ -56,46 +50,14 @@ function setBusy(busy) {
   socialBtns.forEach((b) => (b.disabled = busy));
 }
 
-function setMode(next) {
-  mode = next;
-  const signup = mode === 'signup';
-  tabs.dataset.mode = mode;
-  tabs.querySelectorAll('.tabs__btn').forEach((b) => {
-    const active = b.dataset.mode === mode;
-    b.classList.toggle('is-active', active);
-    b.setAttribute('aria-selected', active);
-  });
-  nameField.hidden = !signup;
-  strengthEl.hidden = !signup;
-  forgotBtn.hidden = signup;
-  pwInput.autocomplete = signup ? 'new-password' : 'current-password';
-  pwInput.placeholder = signup ? 'At least 8 characters' : 'Enter your password';
-  $('#cardTitle').textContent = signup ? 'Create your account' : 'Welcome back';
-  $('#cardSubtitle').textContent = signup
-    ? 'Join Dipti Medical for faster orders & refills'
-    : 'Sign in to continue to Dipti Medical';
-  submitBtn.querySelector('.btn__label').textContent = signup ? 'Create account' : 'Sign in';
-  clearError();
-}
-
-function passwordScore(pw) {
-  let s = 0;
-  if (pw.length >= 8) s++;
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
-  if (/\d/.test(pw)) s++;
-  if (/[^A-Za-z0-9]/.test(pw)) s++;
-  return pw ? Math.max(1, s) : 0;
-}
-
 const ERRORS = {
   'auth/invalid-email': 'Please enter a valid email address.',
   'auth/missing-password': 'Please enter your password.',
   'auth/invalid-credential': 'Incorrect email or password.',
-  'auth/wrong-password': 'Incorrect email or password.',
-  'auth/user-not-found': 'No account found with this email.',
+  'auth/wrong-password':
+    'This email already has an account, but the password is wrong. Try again, tap “Forgot password?”, or use Continue with Google.',
   'auth/user-disabled': 'This account has been disabled. Please contact support.',
-  'auth/email-already-in-use': 'An account with this email already exists. Try signing in.',
-  'auth/weak-password': 'Password is too weak. Use at least 8 characters.',
+  'auth/weak-password': 'Please choose a password with at least 6 characters.',
   'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
   'auth/network-request-failed': 'Network error. Check your internet connection.',
   'auth/popup-closed-by-user': 'Sign-in was cancelled.',
@@ -127,7 +89,7 @@ const {
   auth, api, googleProvider,
   onAuthStateChanged, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail, sendEmailVerification, updateProfile,
+  sendPasswordResetEmail, sendEmailVerification,
   signInWithPopup, signInWithRedirect, signOut,
 } = fb;
 
@@ -143,18 +105,16 @@ async function completeLogin(user) {
   completing = true;
   showLoader('Verifying your account…');
   try {
-    if (pendingDisplayName && !user.displayName) {
-      await updateProfile(user, { displayName: pendingDisplayName }).catch(() => {});
-    }
     loaderText.textContent = 'Setting up your profile…';
-    const { isNewUser } = await api('/api/auth/session', {
+    const { isNewUser, user: profile } = await api('/api/auth/session', {
       method: 'POST',
-      body: { displayName: pendingDisplayName || user.displayName || '' },
+      body: { displayName: user.displayName || '' },
       user,
     });
     loaderText.textContent = isNewUser ? 'Welcome to Dipti Medical!' : 'Welcome back!';
     sessionStorage.setItem('dm_welcome', isNewUser ? 'new' : 'back');
-    setTimeout(() => location.replace('/home/'), 500);
+    const dest = ['admin', 'pharmacist'].includes(profile.role) ? '/admin/' : '/home/';
+    setTimeout(() => location.replace(dest), 500);
   } catch (err) {
     console.error(err);
     await signOut(auth).catch(() => {});
@@ -182,11 +142,6 @@ onAuthStateChanged(auth, (user) => {
 });
 
 /* ---------------- Events ---------------- */
-tabs.addEventListener('click', (e) => {
-  const btn = e.target.closest('.tabs__btn');
-  if (btn && btn.dataset.mode !== mode) setMode(btn.dataset.mode);
-});
-
 $('#togglePw').addEventListener('click', (e) => {
   const btn = e.currentTarget;
   const show = pwInput.type === 'password';
@@ -195,10 +150,27 @@ $('#togglePw').addEventListener('click', (e) => {
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 });
 
-pwInput.addEventListener('input', () => {
-  if (mode === 'signup') strengthEl.dataset.score = passwordScore(pwInput.value);
-});
-[nameInput, emailInput, pwInput].forEach((i) => i.addEventListener('input', () => i.classList.remove('is-invalid')));
+[emailInput, pwInput].forEach((i) => i.addEventListener('input', () => i.classList.remove('is-invalid')));
+
+// One "Continue" button: existing users are signed in, new emails get an account automatically.
+// Firebase identifies the person by UID either way, and /api/auth/session links that UID to their profile.
+async function continueWithEmail(email, password) {
+  try {
+    return await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    // With email-enumeration protection Firebase reports "invalid-credential" for both a wrong password and an
+    // unknown email, so try creating the account; "email-already-in-use" then means the password was wrong.
+    if (!['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(err.code)) throw err;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      sendEmailVerification(cred.user).catch(() => {});
+      return cred;
+    } catch (createErr) {
+      if (createErr.code === 'auth/email-already-in-use') throw Object.assign(new Error(), { code: 'auth/wrong-password' });
+      throw createErr;
+    }
+  }
+}
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -206,34 +178,23 @@ form.addEventListener('submit', async (e) => {
 
   const email = emailInput.value.trim();
   const password = pwInput.value;
-  const name = nameInput.value.trim();
 
-  if (mode === 'signup' && name.length < 2) {
-    nameInput.classList.add('is-invalid');
-    return showError('Please enter your full name.');
-  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailInput.classList.add('is-invalid');
     return showError(ERRORS['auth/invalid-email']);
   }
-  if (password.length < (mode === 'signup' ? 8 : 6)) {
+  if (password.length < 6) {
     pwInput.classList.add('is-invalid');
-    return showError(mode === 'signup' ? 'Password must be at least 8 characters.' : ERRORS['auth/missing-password']);
+    return showError(password ? ERRORS['auth/weak-password'] : ERRORS['auth/missing-password']);
   }
 
   setBusy(true);
   try {
-    if (mode === 'signup') {
-      pendingDisplayName = name;
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      sendEmailVerification(cred.user).catch(() => {});
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
+    await continueWithEmail(email, password);
     // onAuthStateChanged → completeLogin takes over from here
   } catch (err) {
-    pendingDisplayName = '';
     setBusy(false);
+    if (err.code === 'auth/wrong-password') pwInput.classList.add('is-invalid');
     showError(friendly(err));
   }
 });

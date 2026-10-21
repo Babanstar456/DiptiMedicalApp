@@ -33,6 +33,14 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('#userProvider').textContent = (user.providers || []).map((p) => PROVIDER_NAMES[p] || p).join(', ') || '—';
     $('#userRole').textContent = user.role;
     $('#userSince').textContent = new Date(user.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' });
+    if (['admin', 'pharmacist'].includes(user.role)) {
+      const link = document.createElement('a');
+      link.href = '/admin/';
+      link.className = 'topbar__btn';
+      link.style.cssText = 'display:inline-flex;align-items:center;text-decoration:none;margin-right:8px';
+      link.textContent = 'Admin panel';
+      $('#signOutBtn').before(link);
+    }
     $('#verifyNote').hidden = fbUser.emailVerified || !(user.providers || []).includes('password');
 
     const welcome = sessionStorage.getItem('dm_welcome');

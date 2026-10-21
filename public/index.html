@@ -58,15 +58,9 @@
     <section class="card" aria-labelledby="cardTitle">
       <div class="card__handle" aria-hidden="true"></div>
       <header class="card__header">
-        <h1 id="cardTitle" class="card__title">Welcome back</h1>
-        <p id="cardSubtitle" class="card__subtitle">Sign in to continue to Dipti Medical</p>
+        <h1 id="cardTitle" class="card__title">Welcome to Dipti Medical</h1>
+        <p id="cardSubtitle" class="card__subtitle">Continue with Google or your email. New here? Your account is created automatically.</p>
       </header>
-
-      <div class="tabs" role="tablist" aria-label="Authentication mode">
-        <button class="tabs__btn is-active" role="tab" aria-selected="true" data-mode="signin" type="button">Sign in</button>
-        <button class="tabs__btn" role="tab" aria-selected="false" data-mode="signup" type="button">Create account</button>
-        <span class="tabs__indicator" aria-hidden="true"></span>
-      </div>
 
       <div class="social">
         <button id="googleBtn" class="btn btn--social" type="button">
@@ -78,14 +72,6 @@
       <div class="divider"><span>or continue with email</span></div>
 
       <form id="authForm" class="form" novalidate>
-        <div class="field field--name" hidden>
-          <label for="name">Full name</label>
-          <div class="field__control">
-            <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z"/></svg>
-            <input id="name" name="name" type="text" autocomplete="name" autocapitalize="words" placeholder="e.g. Priya Sharma" maxlength="100" />
-          </div>
-        </div>
-
         <div class="field">
           <label for="email">Email address</label>
           <div class="field__control">
@@ -101,18 +87,18 @@
           </div>
           <div class="field__control">
             <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2ZM9 6a3 3 0 0 1 6 0v2H9Z"/></svg>
-            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required />
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" minlength="6" required />
             <button id="togglePw" class="field__toggle" type="button" aria-label="Show password" aria-pressed="false">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5Zm0 11a4 4 0 1 1 4-4 4 4 0 0 1-4 4Zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
             </button>
           </div>
-          <div class="strength" id="strength" hidden><span></span><span></span><span></span><span></span></div>
+          <p class="field__hint">At least 6 characters. Forgot it? We’ll email you a reset link.</p>
         </div>
 
         <p id="formError" class="form__error" role="alert" hidden></p>
 
         <button id="submitBtn" class="btn btn--primary" type="submit">
-          <span class="btn__label">Sign in</span>
+          <span class="btn__label">Continue</span>
           <span class="btn__spinner" aria-hidden="true"></span>
         </button>
       </form>
