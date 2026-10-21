@@ -4,7 +4,7 @@ const QUICK = [
   ['#/orders?new=1', 'New sale', 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z'],
   ['#/products?new=1', 'Add product', 'M20 2H4v4h16V2zM5 8v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5zm10 5H9v-2h6v2z'],
   ['#/appointments?new=1', 'Book appointment', 'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11z'],
-  ['#/inventory?adjust=1', 'Stock in / out', 'M16 6l2.3 2.3-4.9 4.9-4-4L2 16.6 3.4 18l6-6 4 4 6.3-6.3L22 12V6z'],
+  ['#/products?inStock=false', 'Out of stock list', 'M16 6l2.3 2.3-4.9 4.9-4-4L2 16.6 3.4 18l6-6 4 4 6.3-6.3L22 12V6z'],
 ];
 
 // Single-series column chart: one brand color, 4px rounded tops on a shared baseline, hover/focus tooltip, table for screen readers.
@@ -44,12 +44,12 @@ export default async function dashboard(view, params, me) {
   view.innerHTML = String(html`
     <p class="muted" style="margin:0 0 12px">${hello ? `Hello ${hello} · ` : ''}${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
     <div class="tiles">
-      <a class="tile" href="#/orders"><div class="tile__label">Today's sales</div><div class="tile__value">${money(d.sales.today.amount)}</div><div class="tile__meta">${num(d.sales.today.count)} orders</div></a>
-      <a class="tile" href="#/orders"><div class="tile__label">This month</div><div class="tile__value">${money(d.sales.month.amount)}</div><div class="tile__meta">${num(d.sales.month.count)} orders</div></a>
+      <a class="tile" href="#/orders"><div class="tile__label">Today's sales</div><div class="tile__value">${money(d.sales.today.amount)}</div><div class="tile__meta">${num(d.sales.today.count)} ${d.sales.today.count === 1 ? 'order' : 'orders'}</div></a>
+      <a class="tile" href="#/orders"><div class="tile__label">This month</div><div class="tile__value">${money(d.sales.month.amount)}</div><div class="tile__meta">${num(d.sales.month.count)} ${d.sales.month.count === 1 ? 'order' : 'orders'}</div></a>
       <a class="tile ${d.openOrders ? 'tile--warn' : ''}" href="#/orders?status=open"><div class="tile__label">Open orders</div><div class="tile__value">${num(d.openOrders)}</div><div class="tile__meta">to pack / deliver</div></a>
       <a class="tile" href="#/appointments"><div class="tile__label">Appointments today</div><div class="tile__value">${num(d.appointments.today)}</div><div class="tile__meta">booked</div></a>
-      <a class="tile ${d.inventory.lowStock ? 'tile--alert' : ''}" href="#/inventory"><div class="tile__label">Low stock</div><div class="tile__value">${num(d.inventory.lowStock)}</div><div class="tile__meta">at or below reorder level</div></a>
-      <a class="tile ${d.inventory.expiring ? 'tile--warn' : ''}" href="#/inventory?tab=expiring"><div class="tile__label">Expiring ≤ 90 days</div><div class="tile__value">${num(d.inventory.expiring)}</div><div class="tile__meta">products in stock</div></a>
+      <a class="tile ${d.inventory.outOfStock ? 'tile--alert' : ''}" href="#/products?inStock=false"><div class="tile__label">Out of stock</div><div class="tile__value">${num(d.inventory.outOfStock)}</div><div class="tile__meta">products to reorder</div></a>
+      <a class="tile ${d.inventory.noPrice ? 'tile--warn' : ''}" href="#/products?price=missing"><div class="tile__label">Price not set</div><div class="tile__value">${num(d.inventory.noPrice)}</div><div class="tile__meta">set before selling</div></a>
       <a class="tile" href="#/products"><div class="tile__label">Active products</div><div class="tile__value">${num(d.inventory.products)}</div><div class="tile__meta">in catalog</div></a>
       ${me.role === 'admin'
         ? html`<a class="tile" href="#/attendance"><div class="tile__label">Staff present</div><div class="tile__value">${num(d.staff.presentToday)} / ${num(d.staff.total)}</div><div class="tile__meta">today</div></a>`

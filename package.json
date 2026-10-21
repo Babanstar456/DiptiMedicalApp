@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "key-to-env": "node scripts/key-to-env.js"
+    "key-to-env": "node scripts/key-to-env.js",
+    "import-report": "node scripts/import-stock-report.js"
   },
   "engines": {
     "node": ">=18"

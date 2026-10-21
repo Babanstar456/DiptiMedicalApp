@@ -70,6 +70,7 @@ export const ICONS = {
   print: 'M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8v5zm3-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm-1-9H6v4h12V3z',
   download: 'M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z',
   camera: 'M12 15.2A3.2 3.2 0 1 0 12 8.8a3.2 3.2 0 0 0 0 6.4zM9 2 7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.2L15 2H9z',
+  tag: 'M21.4 11.6 12.4 2.6A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .6.2 1.1.6 1.4l9 9a2 2 0 0 0 2.8 0l7-7a2 2 0 0 0 0-2.8zM5.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
   refresh: 'M17.6 6.4A8 8 0 1 0 19.7 14h-2.1a6 6 0 1 1-1.4-6.2L13 11h7V4l-2.4 2.4z',
   left: 'M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z',
   right: 'M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z',
@@ -201,7 +202,7 @@ export async function uploadImage(file) {
 
 /* ---------------- Form builder ----------------
  * field: { name, label, type, required, half, hint, options, placeholder, min, max, step, default }
- * types: text email tel number money date time month textarea select switch days image images section custom
+ * types: text email tel number money date time month textarea select combo switch days image images section custom
  */
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const optionCache = new Map();
@@ -295,6 +296,17 @@ export function renderFields(fields, values = {}) {
         } else sel.value = val ?? '';
         break;
       }
+      case 'combo': {
+        // Free text with suggestions: pick an existing name or type a new one.
+        const listId = `${id}_list`;
+        wrap.innerHTML = String(html`${lbl}<input id="${id}" class="input" name="${f.name}" value="${v}" list="${listId}" autocomplete="off" ${attrs} /><datalist id="${listId}"></datalist>`);
+        if (typeof f.options === 'function') {
+          f.options().then((list) => {
+            $('datalist', wrap).innerHTML = String(html`${list.map((o) => html`<option value="${o.label}"></option>`)}`);
+          }, toastError);
+        }
+        break;
+      }
       case 'switch':
         wrap.innerHTML = String(html`<label class="switch" for="${id}"><span>${f.label}</span><input id="${id}" type="checkbox" name="${f.name}" ${raw(v === true || (v === '' && f.default) ? 'checked' : '')} /></label>`);
         break;
@@ -374,13 +386,13 @@ export function resourcePage(cfg) {
     view.innerHTML = String(html`
       <div class="toolbar">
         ${cfg.search === false ? '' : html`<div class="search">${icon('search')}<input class="input" type="search" placeholder="${cfg.searchPlaceholder || 'Search…'}" data-q value="${state.q}" /></div>`}
-        ${(cfg.filters || []).map((f) =>
+        <div class="filters">${(cfg.filters || []).map((f) =>
           f.type === 'date'
             ? html`<input class="input" type="date" data-filter="${f.name}" aria-label="${f.label}" />`
             : html`<select class="select" data-filter="${f.name}" aria-label="${f.label}"><option value="">${f.label}</option>${(Array.isArray(f.options) ? f.options : []).map(
             (o) => html`<option value="${o.value ?? o}">${o.label ?? label(o)}</option>`
           )}</select>`
-        )}
+        )}</div>
         ${cfg.toolbarExtra ? raw(cfg.toolbarExtra) : ''}
       </div>
       <div data-list>${skeleton()}</div>`);

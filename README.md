@@ -14,7 +14,7 @@ src/routes/auth.js             POST /api/auth/session, GET /api/auth/me
 src/routes/config.js           GET /api/config/firebase (public web config)
 public/index.html              Login page (one "Continue" flow) + loading UI
 public/home/index.html         Customer home (placeholder)
-public/admin/index.html        Admin panel (dashboard, catalog, inventory, orders, clinic, HR, payroll)
+public/admin/index.html        Admin panel (dashboard, products & stock, orders, clinic, HR, payroll)
 src/routes/admin/              Admin API (role-protected)
 public/css, public/js, public/img
 ```
@@ -74,12 +74,23 @@ Open http://localhost:3000 — to test on your phone, open `http://<your-PC-LAN-
   Admins can make other users **Staff (pharmacist)** or **Admin** under *Users & access*.
 - **Staff (pharmacist)** can use Dashboard, Orders, Products, Inventory, Categories, Types, Appointments and Doctors.
   **Admins** can also use Staff, Attendance, Payroll and Users.
-- **Stock** only changes through *Inventory → Stock in/out* and through orders (sales deduct, cancellations return),
-  so every change is logged in *Stock history*.
+- **Products & stock** is one page with one form. Category and type are typed or picked inside the form
+  (new names are created automatically; tidy them under *Categories & types*). Stock is a simple
+  **In stock / Out of stock** switch, with no quantities. Out-of-stock products, and products without a price, can't be sold.
 - **Images** are resized in the browser (max 1000px, WebP) and stored in MongoDB, so no extra storage service is needed.
 - **Payroll rules:** gross = basic + allowances; per-day rate = gross ÷ days in month; unpaid days = absent + unpaid leave +
   ½ × half days (unmarked days count as paid); net = gross − absence deduction − fixed deductions − other deductions + bonus.
   *Generate payroll* builds draft payslips from attendance; paid payslips are never changed. Export the salary report as CSV or print it.
+
+## Importing a stock report
+The shop software's *Fast & Slow Moving Analysis* PDF can be imported (needs `pdftotext`, from the poppler-utils package):
+```bash
+npm run import-report -- ~/Downloads/report.pdf --dry-run   # preview counts, writes nothing
+npm run import-report -- ~/Downloads/report.pdf             # import
+```
+It reads name, company, rack, salt, supplier and closing stock (more than 0 = in stock), and guesses category and type
+from the name. Re-running only refreshes stock, company, rack, salt and supplier. Prices, photos, categories and types
+edited in the app are kept. The report has no prices, so imported products show **Price not set** until you add one.
 
 ## Deploying to Vercel
 `server.js` exports the Express app, so Vercel runs it as a serverless function and serves `public/` from its CDN.

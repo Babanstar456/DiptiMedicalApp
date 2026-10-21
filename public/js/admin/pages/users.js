@@ -26,7 +26,7 @@ export default async function users(view, params, me) {
         ${r.items.map((u) => {
           const locked = u.isOwner || u.uid === me.uid;
           return html`<tr data-id="${u._id}">
-            <td class="td-main" data-label="User"><div class="cell-main"><img class="thumb thumb--round" src="${u.photoURL || '/img/logo.svg'}" alt="" loading="lazy" /><div><strong>${u.displayName || '—'}</strong><small>${u.email || u.phoneNumber || ''}</small></div></div></td>
+            <td class="td-main" data-label="User"><div class="cell-main"><img class="thumb thumb--round" src="${u.photoURL || '/img/logo-mark.png'}" alt="" loading="lazy" /><div><strong>${u.displayName || '—'}</strong><small>${u.email || u.phoneNumber || ''}</small></div></div></td>
             <td data-label="Last login">${fmtDateTime(u.lastLoginAt)}</td>
             <td data-label="Role">${locked
               ? html`${badge(u.role)} <small class="muted">${u.isOwner ? 'owner' : 'you'}</small>`

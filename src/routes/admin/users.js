@@ -2,7 +2,7 @@ const r = require('express').Router();
 const User = require('../../models/User');
 const { escapeRegex } = require('../../utils/crud');
 const { isAdminEmail } = require('../../utils/admins');
-const { httpError } = require('./stock');
+const httpError = require('../../utils/httpError');
 
 r.get('/', async (req, res, next) => {
   try {

@@ -19,7 +19,7 @@ body.admin { background: var(--surface-2); color: var(--ink); }
 .sidebar.is-open { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.35); }
 .scrim { position: fixed; inset: 0; z-index: 35; background: rgba(5, 25, 18, .45); animation: fadeIn .2s; }
 .sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
-.sidebar__brand img { border-radius: 10px; }
+.sidebar__brand img { border-radius: 10px; background: #fff; }
 .sidebar__brand strong { display: block; color: #fff; font-size: .98rem; }
 .sidebar__brand span { font-size: .72rem; opacity: .7; letter-spacing: .08em; text-transform: uppercase; }
 
@@ -158,6 +158,15 @@ a.tile:hover { border-color: var(--brand-100); box-shadow: 0 4px 14px rgba(16,35
 /* ---------------- Toolbar & filters ---------------- */
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
 .toolbar > .search { flex: 1 1 220px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters .select, .filters .input { width: auto; min-width: 130px; }
+/* Phones: filters become one sideways-scrolling row instead of a tall stack */
+@media (max-width: 767px) {
+  .toolbar > .search { flex-basis: 100%; }
+  .filters { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 2px; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filters .select, .filters .input { flex: none; }
+}
 .search { position: relative; }
 .search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; width: 18px; height: 18px; fill: var(--ink-3); pointer-events: none; }
 .input, .select, .textarea {
@@ -278,7 +287,7 @@ a.tile:hover { border-color: var(--brand-100); box-shadow: 0 4px 14px rgba(16,35
 .f__req { color: var(--danger); }
 .f--section { grid-column: 1 / -1; margin: 6px 0 -4px; padding-top: 10px; border-top: 1px solid var(--line); font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
 .f--section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
-.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; padding: 0 2px; cursor: pointer; }
+.f .switch, .switch { display: flex; margin: 0; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; padding: 0 2px; cursor: pointer; }
 .switch span { font-size: .88rem; color: var(--ink); }
 .switch input { position: relative; width: 44px; height: 26px; flex: none; margin: 0; -webkit-appearance: none; appearance: none; border-radius: 999px; background: #cfd8d4; transition: background-color .2s; cursor: pointer; }
 .switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }

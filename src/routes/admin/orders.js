@@ -3,7 +3,7 @@ const Order = require('../../models/Order');
 const { ORDER_STATUSES } = require('../../models/Order');
 const Product = require('../../models/Product');
 const { nextSeq } = require('../../models/Counter');
-const { changeStock, httpError } = require('./stock');
+const httpError = require('../../utils/httpError');
 const { escapeRegex, isId } = require('../../utils/crud');
 const { startOfDayIST, endOfDayIST, todayIST } = require('../../utils/dates');
 
@@ -52,7 +52,6 @@ r.get('/:id', async (req, res, next) => {
 
 // Body: { customer:{name,phone,address}, items:[{product, quantity}], discount, paymentMethod, paymentStatus, channel, status, notes, prescriptionImage }
 r.post('/', async (req, res, next) => {
-  const deducted = [];
   try {
     const body = req.body || {};
     const wanted = (Array.isArray(body.items) ? body.items : []).filter((i) => isId(i.product) && Number(i.quantity) > 0);
@@ -64,6 +63,8 @@ r.post('/', async (req, res, next) => {
     const items = wanted.map((i) => {
       const p = byId.get(String(i.product));
       if (!p || !p.isActive) throw httpError(400, 'One of the products is unavailable');
+      if (!p.inStock) throw httpError(409, `${p.name} is marked out of stock`);
+      if (!(p.price > 0)) throw httpError(409, `Set a selling price for ${p.name} before selling it`);
       const quantity = Math.floor(Number(i.quantity));
       return { product: p._id, name: p.name, price: p.price, quantity, gstRate: p.gstRate, total: round2(p.price * quantity) };
     });
@@ -77,11 +78,6 @@ r.post('/', async (req, res, next) => {
     const seq = await nextSeq(`order-${todayIST().slice(0, 7)}`);
     const orderNo = `DM${todayIST().slice(2, 7).replace('-', '')}-${String(seq).padStart(4, '0')}`;
     const status = ORDER_STATUSES.includes(body.status) && body.status !== 'cancelled' ? body.status : 'confirmed';
-
-    for (const i of items) {
-      await changeStock(i.product, -i.quantity, { type: 'sale', reference: orderNo, by: req.user._id });
-      deducted.push(i);
-    }
 
     const order = await Order.create({
       orderNo,
@@ -102,10 +98,6 @@ r.post('/', async (req, res, next) => {
     });
     res.status(201).json(order);
   } catch (err) {
-    // Put back any stock already taken for this failed order
-    for (const i of deducted) {
-      await changeStock(i.product, i.quantity, { type: 'return', note: 'Order creation failed', by: req.user._id }).catch(() => {});
-    }
     next(err);
   }
 });
@@ -119,12 +111,7 @@ r.patch('/:id/status', async (req, res, next) => {
     if (order.status === 'cancelled') throw httpError(409, 'Cancelled orders cannot be changed');
     if (order.status === status) return res.json(order);
 
-    if (status === 'cancelled') {
-      for (const i of order.items) {
-        await changeStock(i.product, i.quantity, { type: 'return', reference: order.orderNo, note: 'Order cancelled', by: req.user._id });
-      }
-      if (order.paymentStatus === 'paid') order.paymentStatus = 'refunded';
-    }
+    if (status === 'cancelled' && order.paymentStatus === 'paid') order.paymentStatus = 'refunded';
     order.status = status;
     order.history.push({ status, by: req.user._id });
     await order.save();

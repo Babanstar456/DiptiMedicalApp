@@ -15,20 +15,17 @@ const productSchema = new mongoose.Schema(
     description: { type: String, trim: true, maxlength: 2000 },
     images: [String],
     mrp: { type: Number, min: 0, default: 0 },
-    price: { type: Number, min: 0, required: true }, // selling price
-    costPrice: { type: Number, min: 0, default: 0 },
+    price: { type: Number, min: 0, default: 0 }, // selling price; 0 = not set yet
     gstRate: { type: Number, min: 0, max: 28, default: 12 },
-    stock: { type: Number, min: 0, default: 0 },
-    reorderLevel: { type: Number, min: 0, default: 10 },
-    batchNo: { type: String, trim: true, maxlength: 40 },
-    expiryDate: Date,
+    inStock: { type: Boolean, default: true, index: true },
     rackLocation: { type: String, trim: true, maxlength: 40 },
+    supplier: { type: String, trim: true, maxlength: 120 },
     prescriptionRequired: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-productSchema.index({ name: 'text', composition: 'text', manufacturer: 'text' });
+productSchema.index({ name: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

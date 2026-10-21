@@ -2,7 +2,7 @@ const { crudRouter, isId } = require('../../utils/crud');
 const Doctor = require('../../models/Doctor');
 const Appointment = require('../../models/Appointment');
 const { nextSeq } = require('../../models/Counter');
-const { httpError } = require('./stock');
+const httpError = require('../../utils/httpError');
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const toMin = (t) => {

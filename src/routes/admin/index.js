@@ -13,7 +13,6 @@ r.use('/uploads', shop, require('./uploads'));
 r.use('/categories', shop, categories);
 r.use('/types', shop, types);
 r.use('/products', shop, products);
-r.use('/inventory', shop, require('./inventory'));
 r.use('/orders', shop, require('./orders'));
 r.use('/doctors', shop, doctors);
 r.get('/appointment-slots', shop, slots);

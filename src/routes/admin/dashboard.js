@@ -13,17 +13,16 @@ r.get('/', async (req, res, next) => {
     const today = todayIST();
     const monthStart = startOfDayIST(`${today.slice(0, 7)}-01`);
     const weekStart = startOfDayIST(addDays(today, -6));
-    const soon = new Date(Date.now() + 90 * 86400000);
     const notCancelled = { status: { $ne: 'cancelled' } };
     const sum = (match) => Order.aggregate([{ $match: match }, { $group: { _id: null, amount: { $sum: '$total' }, count: { $sum: 1 } } }]);
 
-    const [todaySales, monthSales, openOrders, lowStock, expiring, products, appointmentsToday, upcoming, staffCount, presentToday, recentOrders, last7] =
+    const [todaySales, monthSales, openOrders, outOfStock, noPrice, products, appointmentsToday, upcoming, staffCount, presentToday, recentOrders, last7] =
       await Promise.all([
         sum({ ...notCancelled, createdAt: { $gte: startOfDayIST(today), $lte: endOfDayIST(today) } }),
         sum({ ...notCancelled, createdAt: { $gte: monthStart } }),
         Order.countDocuments({ status: { $in: OPEN } }),
-        Product.countDocuments({ isActive: true, $expr: { $lte: ['$stock', '$reorderLevel'] } }),
-        Product.countDocuments({ isActive: true, stock: { $gt: 0 }, expiryDate: { $lte: soon } }),
+        Product.countDocuments({ isActive: true, inStock: false }),
+        Product.countDocuments({ isActive: true, price: { $lte: 0 } }),
         Product.countDocuments({ isActive: true }),
         Appointment.countDocuments({ date: today, status: { $nin: ['cancelled'] } }),
         Appointment.find({ date: today, status: { $in: ['pending', 'confirmed'] } })
@@ -52,7 +51,7 @@ r.get('/', async (req, res, next) => {
         }),
       },
       openOrders,
-      inventory: { products, lowStock, expiring },
+      inventory: { products, outOfStock, noPrice },
       appointments: { today: appointmentsToday, upcoming },
       staff: { total: staffCount, presentToday },
       recentOrders,

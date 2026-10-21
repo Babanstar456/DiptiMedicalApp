@@ -2,8 +2,45 @@ import {
   $, $$, html, el, raw, api, money, num, fmtDate, fmtDateTime, badge, setPage, button, modal, withLoading, toast, toastError,
   skeleton, emptyState, icon, debounce, qs, label, confirmDialog, printHTML, SHOP, renderFields, readFields, validateFields,
 } from '../core.js';
-import { productPicker } from './inventory.js';
 
+/* ---------------- Product search picker ---------------- */
+function productPicker(onPick) {
+  const box = el(html`<div class="picker"><div class="search">${icon('search')}<input class="input" type="search" placeholder="Search product by name, salt or company…" autocomplete="off" /></div><div class="picker__list" hidden></div></div>`);
+  const input = $('input', box);
+  const list = $('.picker__list', box);
+  let results = [];
+  const search = debounce(async () => {
+    const q = input.value.trim();
+    if (!q) return (list.hidden = true);
+    try {
+      ({ items: results } = await api(`/products?${qs({ q, isActive: true, limit: 8 })}`));
+      list.innerHTML = results.length
+        ? String(html`${results.map((p, i) => {
+            const why = !p.inStock ? 'Out of stock' : !(p.price > 0) ? 'Price not set' : '';
+            return html`<button type="button" class="picker__opt" data-i="${i}" ${raw(why ? 'disabled' : '')}>
+              <div><strong>${p.name}</strong><small>${[p.manufacturer, p.composition].filter(Boolean).join(' · ')}</small></div>
+              <div class="end">${p.price > 0 ? money(p.price) : ''}<br /><small>${why || 'In stock'}</small></div></button>`;
+          })}`)
+        : '<div class="empty" style="padding:16px">No products found</div>';
+      list.hidden = false;
+    } catch (err) {
+      toastError(err);
+    }
+  }, 250);
+  input.addEventListener('input', search);
+  list.addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-i]');
+    if (!opt) return;
+    onPick(results[opt.dataset.i]);
+    input.value = '';
+    list.hidden = true;
+    input.focus();
+  });
+  document.addEventListener('click', (e) => !box.contains(e.target) && (list.hidden = true));
+  return box;
+}
+
+const MAX_QTY = 999;
 const STATUSES = ['pending', 'confirmed', 'packed', 'out-for-delivery', 'delivered', 'cancelled'];
 const CHIPS = [['', 'All'], ['open', 'Open'], ...STATUSES.map((s) => [s, label(s)])];
 const PAYMENT_METHODS = ['cash', 'upi', 'card', 'cod', 'online'];
@@ -32,14 +69,14 @@ function newOrderDialog(onDone) {
   const itemsWrap = el(html`<div><div class="f--section" style="margin-bottom:10px">Items</div></div>`);
   const linesEl = el('<div class="lines"></div>');
   const totalsEl = el('<div class="totals"></div>');
-  itemsWrap.append(productPicker(addLine, { inStockOnly: true }), linesEl, totalsEl);
+  itemsWrap.append(productPicker(addLine), linesEl, totalsEl);
   const custForm = renderFields(customerFields, {});
   const payForm = renderFields(payFields, {});
   body.append(itemsWrap, el('<div style="height:16px"></div>'), custForm, el('<div style="height:16px"></div>'), payForm);
 
   function addLine(p) {
     const existing = lines.find((l) => l.product._id === p._id);
-    if (existing) existing.quantity = Math.min(p.stock, existing.quantity + 1);
+    if (existing) existing.quantity = Math.min(MAX_QTY, existing.quantity + 1);
     else lines.push({ product: p, quantity: 1 });
     draw();
   }
@@ -47,9 +84,9 @@ function newOrderDialog(onDone) {
     linesEl.innerHTML = lines.length
       ? String(html`${lines.map(
           (l, i) => html`<div class="line" data-i="${i}">
-            <div class="line__name">${l.product.name}<small>${money(l.product.price)} each · ${num(l.product.stock)} in stock${l.product.prescriptionRequired ? ' · Rx required' : ''}</small></div>
+            <div class="line__name">${l.product.name}<small>${money(l.product.price)} each${l.product.prescriptionRequired ? ' · Rx required' : ''}</small></div>
             <div class="line__total">${money(l.product.price * l.quantity)}</div>
-            <div class="stepper"><button type="button" data-step="-1" aria-label="Less">−</button><input type="number" inputmode="numeric" min="1" max="${l.product.stock}" value="${l.quantity}" aria-label="Quantity" /><button type="button" data-step="1" aria-label="More">+</button></div>
+            <div class="stepper"><button type="button" data-step="-1" aria-label="Less">−</button><input type="number" inputmode="numeric" min="1" max="${MAX_QTY}" value="${l.quantity}" aria-label="Quantity" /><button type="button" data-step="1" aria-label="More">+</button></div>
             <button type="button" class="b b--sm b--ghost" data-remove style="justify-self:end">Remove</button>
           </div>`
         )}`)
@@ -65,7 +102,7 @@ function newOrderDialog(onDone) {
     if (!line) return;
     const l = lines[line.dataset.i];
     const step = e.target.closest('[data-step]');
-    if (step) l.quantity = Math.max(1, Math.min(l.product.stock, l.quantity + Number(step.dataset.step)));
+    if (step) l.quantity = Math.max(1, Math.min(MAX_QTY, l.quantity + Number(step.dataset.step)));
     if (e.target.closest('[data-remove]')) lines.splice(line.dataset.i, 1);
     draw();
   });
@@ -73,7 +110,7 @@ function newOrderDialog(onDone) {
     const line = e.target.closest('[data-i]');
     if (!line || e.target.tagName !== 'INPUT') return;
     const l = lines[line.dataset.i];
-    l.quantity = Math.max(1, Math.min(l.product.stock, Math.floor(Number(e.target.value)) || 1));
+    l.quantity = Math.max(1, Math.min(MAX_QTY, Math.floor(Number(e.target.value)) || 1));
     draw();
   });
   payForm.addEventListener('input', (e) => e.target.name === 'discount' && draw());
@@ -175,7 +212,7 @@ async function orderDetail(id, onChange) {
     const st = e.target.closest('[data-status]');
     if (st) {
       const s = st.dataset.status;
-      if (s === 'cancelled' && !(await confirmDialog('Cancel this order? Items will be returned to stock.', { okText: 'Cancel order', danger: true }))) return;
+      if (s === 'cancelled' && !(await confirmDialog('Cancel this order? A paid order will be marked refunded.', { okText: 'Cancel order', danger: true }))) return;
       try {
         await api(`/orders/${id}/status`, { method: 'PATCH', body: { status: s } });
         toast(`Order marked ${label(s)}`, 'success');

@@ -69,7 +69,7 @@ a { color: var(--brand-600); }
 }
 .brand__inner > :not(.brand__pills) { position: relative; z-index: 1; }
 .brand__logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.05rem; }
-.brand__logo img { width: 40px; height: 40px; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.brand__logo img { width: 40px; height: 40px; border-radius: 12px; background: #fff; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
 .brand__headline {
   margin: 18px 0 0;
   font-size: clamp(1.35rem, 6vw, 1.75rem);
@@ -223,41 +223,26 @@ a { color: var(--brand-600); }
   position: fixed; inset: 0; z-index: 100;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: var(--safe-top) 24px var(--safe-bottom);
-  color: #fff; text-align: center;
-  background: radial-gradient(circle at 50% 35%, #15c08e 0%, var(--brand) 45%, var(--brand-700) 100%);
+  color: var(--ink-2); text-align: center;
+  background: #fff;
   transition: opacity .45s ease, visibility .45s;
 }
 .splash.is-hidden { opacity: 0; visibility: hidden; }
-.splash__logo { position: relative; width: 84px; height: 84px; display: grid; place-items: center; }
-.splash__logo img {
-  position: relative; z-index: 1;
-  border-radius: 22px;
-  box-shadow: 0 14px 34px rgba(0,0,0,.25);
-  animation: heartbeat 1.4s ease-in-out infinite;
-}
-.splash__ring {
-  position: absolute; inset: 0;
-  border-radius: 26px;
-  border: 2px solid rgba(255,255,255,.55);
-  animation: ripple 1.8s ease-out infinite;
-}
-.splash__ring--2 { animation-delay: .9s; }
-@keyframes ripple { from { transform: scale(1); opacity: .9; } to { transform: scale(1.9); opacity: 0; } }
-@keyframes heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.08); } 30% { transform: scale(1); } 45% { transform: scale(1.05); } }
-.splash__title { margin: 28px 0 2px; font-size: 1.6rem; font-weight: 700; letter-spacing: .01em; }
-.splash__tag { margin: 0; opacity: .85; font-size: .9rem; }
+.splash__brand { width: min(200px, 52vw); height: auto; animation: breathe 1.8s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.04); } }
+.splash__tag { margin: 14px 0 0; font-size: .9rem; color: var(--ink-3); }
 .splash__bar {
   position: relative; overflow: hidden;
-  width: min(180px, 50vw); height: 4px; margin-top: 32px;
-  border-radius: 4px; background: rgba(255,255,255,.25);
+  width: min(180px, 50vw); height: 4px; margin-top: 28px;
+  border-radius: 4px; background: var(--brand-50);
 }
 .splash__bar span {
   position: absolute; inset: 0 auto 0 0; width: 40%;
-  border-radius: 4px; background: #fff;
+  border-radius: 4px; background: linear-gradient(90deg, #0b63ab, var(--brand));
   animation: indeterminate 1.2s ease-in-out infinite;
 }
 @keyframes indeterminate { from { left: -40%; } to { left: 100%; } }
-.splash__status { margin: 14px 0 0; font-size: .8rem; opacity: .8; min-height: 1.2em; }
+.splash__status { margin: 14px 0 0; font-size: .8rem; color: var(--ink-3); min-height: 1.2em; }
 
 /* =========================================================
    Auth overlay loader (capsule)
@@ -337,7 +322,7 @@ a { color: var(--brand-600); }
   .brand__headline, .brand__pills { display: none; }
   .card__handle { display: none; }
   .card { padding-top: 20px; }
-  .splash__title { margin-top: 16px; }
+  .splash__brand { width: min(140px, 30vh); }
   .splash__bar { margin-top: 18px; }
 }
 
@@ -402,5 +387,5 @@ a { color: var(--brand-600); }
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
-  .splash__bar span, .capsule, .btn__spinner { animation-iteration-count: infinite !important; animation-duration: 1.5s !important; }
+  .splash__bar span, .splash__brand, .capsule, .btn__spinner { animation-iteration-count: infinite !important; animation-duration: 1.5s !important; }
 }

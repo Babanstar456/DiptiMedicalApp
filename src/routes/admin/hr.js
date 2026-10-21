@@ -5,7 +5,7 @@ const Attendance = require('../../models/Attendance');
 const { ATTENDANCE_STATUSES } = require('../../models/Attendance');
 const Payroll = require('../../models/Payroll');
 const { nextSeq } = require('../../models/Counter');
-const { httpError } = require('./stock');
+const httpError = require('../../utils/httpError');
 const { daysInMonth, todayIST } = require('../../utils/dates');
 
 const round2 = (n) => Math.round(n * 100) / 100;

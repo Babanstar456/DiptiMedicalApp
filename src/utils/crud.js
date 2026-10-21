@@ -8,6 +8,7 @@ const PROTECTED = ['_id', '__v', 'createdAt', 'updatedAt'];
 // into "unset" (undefined) for unique strings like SKU, so many blank values don't collide.
 function cleanBody(Model, body = {}, readOnly = []) {
   const data = { ...body };
+  // Extra (non-schema) keys stay for hooks such as beforeSave; Mongoose drops any that remain.
   [...PROTECTED, ...readOnly].forEach((k) => delete data[k]);
   for (const [key, value] of Object.entries(data)) {
     const path = Model.schema.path(key);
