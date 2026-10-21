@@ -9,11 +9,12 @@ function normalizePrivateKey(raw) {
 
 function loadCredential() {
   // Whole service-account JSON pasted into .env (single-line or multi-line inside single quotes)
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (raw && raw.trim()) {
+  // Hosting dashboards (e.g. Vercel) keep any wrapping quotes literally, so strip them.
+  const raw = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim().replace(/^'([\s\S]*)'$/, '$1');
+  if (raw) {
     let json;
     try {
-      json = JSON.parse(raw.trim());
+      json = JSON.parse(raw);
     } catch {
       throw new Error(
         "FIREBASE_SERVICE_ACCOUNT is not valid JSON. Paste the entire key file wrapped in single quotes: FIREBASE_SERVICE_ACCOUNT='{ ... }'"
@@ -47,8 +48,10 @@ function loadCredential() {
   );
 }
 
-if (!admin.apps.length) {
-  admin.initializeApp({ credential: loadCredential() });
+// Initialised on first use so a missing/bad key returns a clear API error instead of crashing on load.
+function getAdmin() {
+  if (!admin.apps.length) admin.initializeApp({ credential: loadCredential() });
+  return admin;
 }
 
-module.exports = admin;
+module.exports = getAdmin;

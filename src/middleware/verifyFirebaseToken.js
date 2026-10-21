@@ -1,4 +1,4 @@
-const admin = require('../config/firebaseAdmin');
+const getAdmin = require('../config/firebaseAdmin');
 
 // Expects "Authorization: Bearer <Firebase ID token>" — works the same for web and the future mobile app.
 async function verifyFirebaseToken(req, res, next) {
@@ -6,6 +6,13 @@ async function verifyFirebaseToken(req, res, next) {
   const [scheme, token] = header.split(' ');
   if (scheme !== 'Bearer' || !token) {
     return res.status(401).json({ error: 'Missing or malformed Authorization header' });
+  }
+
+  let admin;
+  try {
+    admin = getAdmin();
+  } catch (err) {
+    return next(err);
   }
 
   try {

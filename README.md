@@ -63,6 +63,16 @@ npm start
 Open http://localhost:3000 — to test on your phone, open `http://<your-PC-LAN-IP>:3000`
 (and add that IP to Firebase *Authorized domains*).
 
+## Deploying to Vercel
+`server.js` exports the Express app, so Vercel runs it as a serverless function and serves `public/` from its CDN.
+
+1. **Vercel → Project → Settings → Environment Variables**: add every variable from `.env`
+   (`MONGODB_URI`, all `FIREBASE_*`, and `FIREBASE_SERVICE_ACCOUNT`). For `FIREBASE_SERVICE_ACCOUNT`,
+   paste the JSON itself. The surrounding single quotes are optional there. Then **redeploy**.
+2. **MongoDB Atlas → Network Access**: add `0.0.0.0/0`. Vercel uses changing IP addresses.
+3. **Firebase → Authentication → Settings → Authorized domains**: add your `*.vercel.app` domain.
+4. Open `https://<your-app>.vercel.app/api/health`. It shows `"status":"ok"`, or lists the variables that are still missing.
+
 ## Turning it into a mobile app
 The pages are already responsive (safe-area insets for notches, 16px inputs to avoid iOS zoom,
 48px+ touch targets, landscape and tiny-screen layouts, PWA manifest).

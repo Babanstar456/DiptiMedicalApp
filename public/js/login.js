@@ -154,7 +154,7 @@ async function completeLogin(user) {
     });
     loaderText.textContent = isNewUser ? 'Welcome to Dipti Medical!' : 'Welcome back!';
     sessionStorage.setItem('dm_welcome', isNewUser ? 'new' : 'back');
-    setTimeout(() => location.replace('/home'), 500);
+    setTimeout(() => location.replace('/home/'), 500);
   } catch (err) {
     console.error(err);
     await signOut(auth).catch(() => {});

@@ -3,28 +3,22 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-// Fail early with a readable checklist instead of a stack trace when setup is incomplete.
-(function checkEnv() {
+// Lists required settings that are missing (names only, never values).
+function missingEnv() {
   const env = process.env;
   const isSet = (k) => env[k] && !/xxxxx|PASTE_KEY_HERE|your-project|<user>/.test(env[k]);
-  const missing = [];
-  if (!fs.existsSync(path.join(__dirname, '.env'))) missing.push('.env file (copy .env.example to .env)');
-  ['MONGODB_URI', 'FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID', 'FIREBASE_APP_ID'].forEach(
-    (k) => !isSet(k) && missing.push(k)
+  const missing = ['MONGODB_URI', 'FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID', 'FIREBASE_APP_ID'].filter(
+    (k) => !isSet(k)
   );
   const keyFile = env.FIREBASE_SERVICE_ACCOUNT_PATH && path.resolve(env.FIREBASE_SERVICE_ACCOUNT_PATH);
   const hasKeyFile = keyFile && fs.existsSync(keyFile);
   const hasKeyJson = isSet('FIREBASE_SERVICE_ACCOUNT') && env.FIREBASE_SERVICE_ACCOUNT.includes('private_key');
   const hasKeyVars = isSet('FIREBASE_CLIENT_EMAIL') && isSet('FIREBASE_PRIVATE_KEY');
-  if (!hasKeyJson && !hasKeyFile && !hasKeyVars) {
-    missing.push("FIREBASE_SERVICE_ACCOUNT (paste the whole service-account JSON inside single quotes)");
-  }
-  if (missing.length) {
-    console.error('\n[setup] The app is not configured yet. Missing:\n  - ' + missing.join('\n  - '));
-    console.error('\nSee README.md → Setup for where to get each value.\n');
-    process.exit(1);
-  }
-})();
+  if (!hasKeyJson && !hasKeyFile && !hasKeyVars) missing.push('FIREBASE_SERVICE_ACCOUNT');
+  return missing;
+}
+const missing = missingEnv();
+if (missing.length) console.error('[setup] Missing environment variables: ' + missing.join(', '));
 
 const express = require('express');
 const helmet = require('helmet');
@@ -61,29 +55,55 @@ app.use(compression());
 app.use(express.json({ limit: '100kb' }));
 app.use(morgan(isProd ? 'combined' : 'dev'));
 
+app.get('/api/health', (req, res) =>
+  res.status(missing.length ? 500 : 200).json({ status: missing.length ? 'misconfigured' : 'ok', missing })
+);
+
+// Every API needs configuration; report what's missing instead of crashing.
+app.use('/api', (req, res, next) => {
+  if (!missing.length) return next();
+  res.status(500).json({ error: 'Server is not configured', missing });
+});
+
 app.use('/api/config', require('./src/routes/config'));
 app.use(
   '/api/auth',
+  (req, res, next) => connectDB().then(() => next(), next),
   rateLimit({ windowMs: 15 * 60 * 1000, limit: 100, standardHeaders: 'draft-7', legacyHeaders: false }),
   require('./src/routes/auth')
 );
-app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'], maxAge: isProd ? '1h' : 0 }));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// Locally Express serves public/; on Vercel the same folder is served by its CDN.
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: isProd ? '1h' : 0 }));
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
-app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'index.html')));
+app.use((req, res) => res.redirect('/'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error('[error]', err);
+  if (/^Mongo/.test(err.name)) {
+    return res.status(503).json({ error: 'Database connection failed. Check MONGODB_URI and Atlas Network Access.' });
+  }
+  if (/FIREBASE_|Firebase Admin/.test(err.message)) {
+    return res.status(500).json({ error: err.message });
+  }
   res.status(err.status || 500).json({ error: isProd ? 'Something went wrong' : err.message });
 });
 
-connectDB(process.env.MONGODB_URI)
-  .then(() => app.listen(PORT, () => console.log(`[server] Dipti Medical running on http://localhost:${PORT}`)))
-  .catch((err) => {
-    console.error('[server] Failed to start:', err.message);
+module.exports = app;
+
+// `npm start` / `npm run dev`: run a normal server. On Vercel the exported app is used instead.
+if (require.main === module) {
+  if (missing.length) {
+    console.error('\nThe app is not configured yet. Add these to .env:\n  - ' + missing.join('\n  - '));
+    console.error('\nSee README.md → Setup for where to get each value.\n');
     process.exit(1);
-  });
+  }
+  connectDB()
+    .then(() => app.listen(PORT, () => console.log(`[server] Dipti Medical running on http://localhost:${PORT}`)))
+    .catch((err) => {
+      console.error('[server] Failed to start:', err.message);
+      process.exit(1);
+    });
+}
